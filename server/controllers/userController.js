@@ -1,5 +1,6 @@
 const path = require('path');
 const getFileContent = require('../helpers/getFileContent');
+const user = require('../models/user');
 
 const pathToUsers = path.join(__dirname, '..', 'data', 'users.json');
 
@@ -21,7 +22,20 @@ function getOneUser(req, res) {
     });
 }
 
+function createUser(req, res) {
+  const { name, about, avatar } = req.body;
+  user.create({ name, about, avatar })
+    .then((user) => res.status(200).send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: err });
+      }
+      res.status(500).send({ message: err });
+    });
+}
+
 module.exports = {
   getUsers,
   getOneUser,
+  createUser,
 };
