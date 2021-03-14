@@ -11,7 +11,7 @@ const userRouter = require('./server/routes/users');
 const cardRouter = require('./server/routes/cards');
 
 mongoose.connect('mongodb://localhost:27017/aroundb', {
-  usedNewUrlParser: true,
+  useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
   useUnifiedTopology: true,

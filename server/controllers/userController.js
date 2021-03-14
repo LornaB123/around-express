@@ -1,3 +1,4 @@
+/* eslint-disable */
 const path = require('path');
 const getFileContent = require('../helpers/getFileContent');
 const user = require('../models/user');
