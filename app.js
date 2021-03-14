@@ -18,8 +18,9 @@ mongoose.connect('mongodb://localhost:27017/aroundb', {
 
 app.use(express.json());
 app.use(helmet());
-app.use('/', userRouter);
-app.use('/', cardRouter);
+
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 
 app.use((req, res, next) => {
   req.user = {
@@ -28,7 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('*', (req, res) => {
+app.use('*', (req, res) => {
   res.status(404).send({ message: 'Requested resource not found' });
 });
 
