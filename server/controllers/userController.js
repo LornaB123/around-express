@@ -25,11 +25,8 @@ function getOneUser(req, res) {
 
 function createUser(req, res) {
   const { name, about, avatar } = req.body;
-  // record data into the database
-  user.create({ name, about, avatar })
-    // return the recorded data to the user
+  return user.create({ name, about, avatar })
     .then((user) => res.status(200).send(user))
-    // if the data was not recorded, display an error message
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: err });
