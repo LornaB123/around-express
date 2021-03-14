@@ -1,4 +1,5 @@
 /* eslint-disable */
+const { ESRCH } = require('constants');
 const path = require('path');
 const getFileContent = require('../helpers/getFileContent');
 const user = require('../models/user');
@@ -25,7 +26,7 @@ function getOneUser(req, res) {
 
 function createUser(req, res) {
   const { name, about, avatar } = req.body;
-  return user.create({ name, about, avatar })
+  user.create({ name, about, avatar })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -35,8 +36,34 @@ function createUser(req, res) {
     });
 }
 
+function updateUser(req, res) {
+  const {name, about} = req.body;
+  user.findByIdAndUpdate(req.user._id, {name, about}, {new: true})
+  .then((user) => res.status(200).send(user))
+  .catch((err) => {
+    if(err.name === 'ValidationError') {
+      return res.status(400).send({message: 'Invalid data, cannot update user'});
+    }
+    return res.status(404).send({message: 'User ID not found'});
+  })
+}
+
+function updateAvatar(req, res) {
+  const {avatar} = req.body;
+  user.findByIdAndUpdate(req.user._id, {avatar}, {new: true})
+  .then((user) => res.send(user))
+  .catch((err) => {
+    if(err.name === 'ValidationError') {
+      return res.status(400).send({ message: 'Invalid data, cannot update avatar'});
+    }
+    return res.status(404).send({message: 'User ID not found'});
+  })
+}
+
 module.exports = {
   getUsers,
   getOneUser,
   createUser,
+  updateUser,
+  updateAvatar,
 };
