@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const helmet = require('helmet');
 
 const { PORT = 3000 } = process.env;
 
@@ -17,10 +16,9 @@ mongoose.connect('mongodb://localhost:27017/aroundb', {
 });
 
 app.use(express.json());
-app.use(helmet());
 
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
+app.use('/', userRouter);
+app.use('/', cardRouter);
 
 app.use((req, res, next) => {
   req.user = {
