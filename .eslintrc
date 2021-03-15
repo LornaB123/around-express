@@ -3,10 +3,10 @@
 
   "rules" : {
     "no-underscore-dangle" : 0,
-    "import/no-unresolved": [
-      2,
-      { "caseSensitive": false }
-   ]
+      "import/no-unresolved": [
+         2,
+         { "caseSensitive": false }
+      ]
   }
 }
 
