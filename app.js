@@ -26,10 +26,7 @@ app.use('/', userRouter);
 app.use('/', cardRouter);
 
 app.all('*', (req, res) => {
-  if (err.name === 'CastError') {
-    return res.status(400).send({ message: 'Requested resource not found' });
-  }
-  res.status(500).send({ message: 'Error' });
+  res.status(400).send({ message: 'Requested resource not found' });
 });
 
 app.listen(PORT, () => {
