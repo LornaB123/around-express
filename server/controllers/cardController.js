@@ -23,19 +23,22 @@ function createCard(req, res) {
 function deleteCard(req, res) {
   card.findByIdAndRemove(req.params.cardId)
   .then((card) => {
-    if (!card) {
-      return res.status(404).send({message: 'Sorry, the card is not found'});
+    if (card) {
+      return res.send({ data: card});
+    } else {
+      return res.status(404).send({ message: 'Card not found.'});
     }
-    return res.status(200).send({data: card})
   })
   .catch((err) => {
-    if(err.name === 'CastError') {
+    if (err.name === 'ValidationError') {
       return res.status(400).send({message: err});
+    } else if (err.name === 'CastError') {
+      return res.status(404).send({message: 'Card not found.'});
     } else {
-      return res.status(500).send({message: err});
+      return res.status(500).send({message: 'Internal server error.'  });
     }
   });
-}
+};
 
 function likeCard(req, res){
   card.findByIdAndUpdate(
@@ -43,15 +46,16 @@ function likeCard(req, res){
     { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
     { new: true },
     )
-    .then((card) => res.send(card))
-    .catch((err) => {
-      if(err.name === 'CastError') {
-        return res.status(400).send({ message: err });
+    .then((user) => {
+      if (user) {
+        res.send({ data: user });
+      } else if (err.name === 'CastError') {
+        res.status(404).send({ message: 'Card not found.'});
       } else {
-        return res.status(500).send({ message: err });
+        return res.status(500).send({ message: 'Internal Server Error' });
       }
     });
-}
+};
 
 
 function dislikeCard(req, res){
@@ -60,15 +64,17 @@ function dislikeCard(req, res){
     { $pull: { likes: req.user._id } }, // remove _id from the array
     { new: true },
   )
-  .then((card) => res.send(card))
-    .catch((err) => {
-      if(err.name === 'CastError') {
-        return res.status(400).send({ message: err });
-      } else {
-        return res.status(500).send({ message: err });
-      }
-    });
-}
+  .then((user) => {
+    if (user) {
+      res.send({ data: user });
+    } else if (err.name === 'CastError') {
+      res.status(404).send({ message: 'Card not found.'});
+    } else {
+      return res.status(500).send({ message: 'Internal Server Error' });
+    }
+  });
+};
+
 
 module.exports = {
   getCards,

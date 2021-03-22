@@ -16,19 +16,20 @@ mongoose.connect('mongodb://localhost:27017/aroundb', {
 });
 
 app.use(express.json());
-
-app.use('/', userRouter);
-app.use('/', cardRouter);
-
 app.use((req, res, next) => {
   req.user = {
     _id: '604da81c4df13c35e4bdb2a7', // paste the _id of the test user created in the previous step
   };
   next();
 });
+app.use('/', userRouter);
+app.use('/', cardRouter);
 
 app.all('*', (req, res) => {
-  res.status(404).send({ message: 'Requested resource not found' });
+  if (err.name === 'CastError') {
+    return res.status(400).send({ message: 'Requested resource not found' });
+  }
+  res.status(500).send({ message: 'Error' });
 });
 
 app.listen(PORT, () => {

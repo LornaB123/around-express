@@ -1,10 +1,19 @@
 const User = require('../models/user');
 
 function getUsers(req, res) {
-  return User
-    .find({})
+  return User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) => res.status(400).send({ message: err }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(400)
+          .send({ message: 'Validation failed, user cannot be created' });
+      } else if (err.name === 'CastError') {
+        res.status(404).send({ message: 'User not found' });
+      } else {
+        res.status(500).send({ message: 'Internal Server Error.' });
+      }
+    });
 }
 
 function getOneUser(req, res) {
@@ -18,9 +27,9 @@ function getOneUser(req, res) {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: err });
+        return res.status(400).send({ message: 'Response' });
       }
-      return res.status(500).send({ message: err });
+      return res.status(500).send({ message: 'Error' });
     });
 }
 
@@ -40,30 +49,32 @@ function createUser(req, res) {
 function updateUser(req, res) {
   const { name, about } = req.body;
   return User
-    .findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+    .findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({ message: 'Invalid data, cannot update user' });
+        res.status(400).send({ message: 'Invalid data, cannot update user' });
+      } else if (err.name === 'CastError') {
+        res.status(404).send({ message: 'User not found.' });
+      } else {
+        res.status(500).send({ message: 'Internal Server Error.' });
       }
-      return res.status(404).send({ message: 'User ID not found' });
     });
 }
 
 function updateAvatar(req, res) {
   const { avatar } = req.body;
   return User
-    .findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+    .findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({ message: 'Invalid data, cannot update avatar' });
+        res.status(400).send({ message: 'Invalid data, cannot update user' });
+      } else if (err.name === 'CastError') {
+        res.status(404).send({ message: 'User not found.' });
+      } else {
+        res.status(500).send({ message: 'Internal Server Error.' });
       }
-      return res.status(404).send({ message: 'User ID not found' });
     });
 }
 
