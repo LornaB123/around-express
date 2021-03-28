@@ -44,8 +44,7 @@ function likeCard(req, res){
   card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
-    { new: true },
-    )
+    { new: true })
     .then((user) => {
       if (user) {
         res.send({ data: user });

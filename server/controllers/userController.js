@@ -21,7 +21,7 @@ function getOneUser(req, res) {
     .findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'User ID not found' });
+        return res.status(400).send({ message: 'User ID not found' });
       }
       return res.status(200).send(user);
     })
