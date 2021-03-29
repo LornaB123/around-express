@@ -31,9 +31,9 @@ function deleteCard(req, res) {
   })
   .catch((err) => {
     if (err.name === 'ValidationError') {
-      return res.status(400).send({message: err});
+      return res.status(404).send({message: err});
     } else if (err.name === 'CastError') {
-      return res.status(404).send({message: 'Card not found.'});
+      return res.status(400).send({message: 'Card not found.'});
     } else {
       return res.status(500).send({message: 'Internal server error.'  });
     }
@@ -44,14 +44,22 @@ function likeCard(req, res){
   card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
-    { new: true })
+    { new: true },
+    )
     .then((user) => {
       if (user) {
         res.send({ data: user });
+      } else  {
+        res.status(400).send({ message: 'Card not found.'});
+      }
+    })
+    .catch((err) => {
+      if(err.name === 'ValidationError') {
+        res.status(404).send({message:'Data validation failed, card cannot be found'});
       } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Card not found.'});
+        res.status(400).send({message: 'Card not found.'});
       } else {
-        return res.status(500).send({ message: 'Internal Server Error' });
+        res.status(500).send({message: 'Internal server error'});
       }
     });
 };
@@ -67,7 +75,7 @@ function dislikeCard(req, res){
     if (user) {
       res.send({ data: user });
     } else if (err.name === 'CastError') {
-      res.status(404).send({ message: 'Card not found.'});
+      res.status(400).send({ message: 'Card not found.'});
     } else {
       return res.status(500).send({ message: 'Internal Server Error' });
     }

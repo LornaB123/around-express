@@ -4,12 +4,10 @@ function getUsers(req, res) {
   return User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res
-          .status(400)
-          .send({ message: 'Validation failed, user cannot be created' });
-      } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'User not found' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'User not found' });
+      } else if (err.name === 'ValidationError') {
+        res.status(404).send({ message: 'Validation failed, user cannot be created' });
       } else {
         res.status(500).send({ message: 'Internal Server Error.' });
       }
@@ -17,63 +15,76 @@ function getUsers(req, res) {
 }
 
 function getOneUser(req, res) {
-  return User
-    .findById(req.params.userId)
+  User.findById(req.params.id)
     .then((user) => {
-      if (!user) {
-        return res.status(400).send({ message: 'User ID not found' });
+      if (user) {
+        res.send({ data: user });
+      } else {
+        res.status(404).send({ message: 'User not found.' });
       }
-      return res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Response' });
+      if (err.name === 'ValidationError') {
+        res.status(404).send({ message: 'Validation failed:  user cannot be found.' });
+      } else if (err.name === 'CastError') {
+        res.status(400).send({ message: 'User not found.' });
+      } else {
+        res.status(500).send({ message: 'Internal server error.' });
       }
-      return res.status(500).send({ message: 'Error' });
     });
 }
 
 function createUser(req, res) {
   const { name, about, avatar } = req.body;
-  return User
-    .create({ name, about, avatar })
-    .then((user) => res.status(200).send(user))
+  User.create({ name, about, avatar })
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: err });
+        res.status(404).send({ message: 'Validation failed:  user cannot be created.' });
+      } else if (err.name === 'CastError') {
+        res.status(400).send({ message: 'User not found.' });
+      } else {
+        res.status(500).send({ message: 'Internal server error.' });
       }
-      return res.status(500).send({ message: err });
     });
 }
 
 function updateUser(req, res) {
-  const { name, about } = req.body;
-  return User
-    .findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .then((user) => res.status(200).send(user))
+  User.findByIdAndUpdate(
+    { _id: req.user._id },
+    { $set: { name: req.body.name, about: req.body.about } },
+    { new: true, runValidators: true },
+  )
+    .then((user) => {
+      res.send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Invalid data, cannot update user' });
+        res.status(404).send({ message: 'Validation failed:  user cannot be updated.' });
       } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'User not found.' });
+        res.status(400).send({ message: 'User not found.' });
       } else {
-        res.status(500).send({ message: 'Internal Server Error.' });
+        res.status(500).send({ message: 'Internal server error' });
       }
     });
 }
 
 function updateAvatar(req, res) {
-  const { avatar } = req.body;
-  return User
-    .findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((user) => res.send(user))
+  User.findByIdAndUpdate(
+    { _id: req.user._id },
+    { avatar: req.body.avatar },
+    { new: true, runValidators: true },
+  )
+    .then((user) => {
+      res.send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Invalid data, cannot update user' });
+        res.status(404).send({ message: 'Validation failed:  avatar cannot be updated.' });
       } else if (err.name === 'CastError') {
-        res.status(404).send({ message: 'User not found.' });
+        res.status(400).send({ message: 'User not found.' });
       } else {
-        res.status(500).send({ message: 'Internal Server Error.' });
+        res.status(500).send({ message: 'Internal server error' });
       }
     });
 }
