@@ -2,16 +2,8 @@ const User = require('../models/user');
 
 function getUsers(req, res) {
   User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'User not found' });
-      } else if (err.name === 'ValidationError') {
-        res.status(404).send({ message: 'Validation failed, user cannot be created' });
-      } else {
-        res.status(500).send({ message: 'Internal Server Error.' });
-      }
-    });
+    .then((users) => res.status(200).send({ data: users }))
+    .catch(() => res.status(500).send({ message: 'Internal Server Error.' }));
 }
 
 function getOneUser(req, res) {
@@ -51,7 +43,7 @@ function createUser(req, res) {
 function updateUser(req, res) {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
-    req.params.id,
+    req.user._id,
     { name, about },
     { new: true, runValidators: true },
   )

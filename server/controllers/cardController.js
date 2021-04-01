@@ -31,8 +31,8 @@ function createCard(req, res) {
 function deleteCard(req, res) {
   Card.findByIdAndRemove(req.params.cardId)
   .then((card) => {
+    console.log(card);
     if (!card) {
-      console.log(card)
      res.status(404).send({ message: 'Card not found.' });
     } else if (!card.owner._id === req.user._id) {
       res.status(403).send({ message: 'Forbidden. User ID is invalid.' })
@@ -46,7 +46,7 @@ function deleteCard(req, res) {
       res.status(500).send({message: 'Internal server error.'  });
     }
   });
-};
+}
 
 function likeCard(req, res){
   Card.findByIdAndUpdate(
@@ -68,7 +68,7 @@ function likeCard(req, res){
         res.status(500).send({message: 'Internal server error.'  });
       }
     });
-  };
+  }
 
 
 function dislikeCard(req, res){
@@ -89,7 +89,7 @@ function dislikeCard(req, res){
     }
     res.status(500).send({ message: 'Internal server error' });
   });
-};
+}
 
 
 module.exports = {
