@@ -1,68 +1,74 @@
 /* eslint-disable */
-const card = require('../models/card');
+const Card = require('../models/card');
 
 function getCards(req, res) {
-  return card.find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.status(400).send({message: err}));
-}
+  Card.find({})
+    .then((card) => res.status(200).send({ data: card} ))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Inavlid data passed.'});
+      } else if (err.name === 'CastError') {
+        res.status(404).send({ message: 'Card not found.' });
+      } else {
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    });
+    }
 
 function createCard(req, res) {
   const {name, link} = req.body;
-  card.create({name, link, owner: req.user._id})
+  Card.create({name, link, owner: req.user._id})
   .then((card) => res.status(200).send(card))
   .catch((err) => {
     if(err.name === 'ValidationError') {
-      return res.status(400).send({message: err});
+      return res.status(400).send({message: 'Inavlid data passed.'});
     } else {
-      return res.status(500).send({message: err});
+      return res.status(500).send({message: 'Internal server error.'});
     }
   });
 }
 
 function deleteCard(req, res) {
-  card.findByIdAndRemove(req.params.cardId)
+  Card.findByIdAndRemove(req.params.cardId)
   .then((card) => {
-    if (card) {
-      return res.send({ data: card});
-    } else {
-      return res.status(404).send({ message: 'Card not found.'});
+    if (!card) {
+      console.log(card)
+     res.status(404).send({ message: 'Card not found.' });
+    } else if (!card.owner._id === req.user._id) {
+      res.status(403).send({ message: 'Forbidden. User ID is invalid.' })
     }
+    res.status(200).send({ message: 'Card deleted.' });
   })
   .catch((err) => {
-    if (err.name === 'ValidationError') {
-      return res.status(404).send({message: err});
-    } else if (err.name === 'CastError') {
-      return res.status(400).send({message: 'Card not found.'});
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Invalid data passed.' });
     } else {
-      return res.status(500).send({message: 'Internal server error.'  });
+      res.status(500).send({message: 'Internal server error.'  });
     }
   });
 };
 
 function likeCard(req, res){
-  card.findByIdAndUpdate(
+  Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
     { new: true },
     )
-    .then((user) => {
-      if (user) {
-        res.send({ data: user });
+    .then((card) => {
+      if (!card) {
+        res.status(404).send({ message: 'Card not found.'});
       } else  {
-        res.status(400).send({ message: 'Card not found.'});
+        res.send({ data: card });
       }
     })
     .catch((err) => {
-      if(err.name === 'ValidationError') {
-        res.status(404).send({message:'Data validation failed, card cannot be found'});
-      } else if (err.name === 'CastError') {
-        res.status(400).send({message: 'Card not found.'});
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Invalid data passed.' });
       } else {
-        res.status(500).send({message: 'Internal server error'});
+        res.status(500).send({message: 'Internal server error.'  });
       }
     });
-};
+  };
 
 
 function dislikeCard(req, res){
@@ -71,14 +77,17 @@ function dislikeCard(req, res){
     { $pull: { likes: req.user._id } }, // remove _id from the array
     { new: true },
   )
-  .then((user) => {
-    if (user) {
-      res.send({ data: user });
-    } else if (err.name === 'CastError') {
-      res.status(400).send({ message: 'Card not found.'});
-    } else {
-      return res.status(500).send({ message: 'Internal Server Error' });
+  .then((card) => {
+    if (!card) {
+      res.status(404).send({ message: 'Card not found' });
     }
+    res.status(200).send({ data: card });
+  })
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      res.status(400).send({ message: 'Invalid data passed.' });
+    }
+    res.status(500).send({ message: 'Internal server error' });
   });
 };
 
