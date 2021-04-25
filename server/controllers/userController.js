@@ -10,7 +10,7 @@ function getOneUser(req, res) {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'User cannot be found'});
+        res.status(404).send({ message: 'User cannot be found' });
       }
       return res.status(200).send({ data: user });
     })
@@ -72,7 +72,7 @@ function updateAvatar(req, res) {
   )
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'User cannot be found'});
+        res.status(404).send({ message: 'User cannot be found' });
       }
       return res.status(200).send({ data: user });
     })
